@@ -1,0 +1,39 @@
+name: Selenium WebDriver POM
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Install Chrome and ChromeDriver
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+        sudo apt-get install -y chromium-chromedriver
+
+    - name: Install dependencies
+      run: dotnet restore SwagLabsPOM/SwagLabsPOM.csproj
+
+    - name: Build
+      run: dotnet build SwagLabsPOM/SwagLabsPOM.csproj --no-restore
+
+    - name: Run tests
+      env:
+        CHROMEWEBDRIVER: /usr/bin/chromedriver
+      run: dotnet test SwagLabsPOM/SwagLabsPOM.csproj --verbosity normal
